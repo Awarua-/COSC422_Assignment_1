@@ -63,13 +63,13 @@ void initialise()
 	glm::mat4 proj, view;
 	GLuint shaderv = loadShader(GL_VERTEX_SHADER, "Assignment1.vert");
 	GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "Assignment1.frag");
-//	GLuint shadertc = loadShader(GL_TESS_CONTROL_SHADER, "Assignment1.tcs");
-//	GLuint shaderte = loadShader(GL_TESS_EVALUATION_SHADER, "Assignment1.tes");
+	GLuint shadertc = loadShader(GL_TESS_CONTROL_SHADER, "Assignment1.tcs");
+	GLuint shaderte = loadShader(GL_TESS_EVALUATION_SHADER, "Assignment1.tes");
 
 	GLuint program = glCreateProgram();
 	glAttachShader(program, shaderv);
-//	glAttachShader(program, shadertc);
-//	glAttachShader(program, shaderte);
+	glAttachShader(program, shadertc);
+	glAttachShader(program, shaderte);
 	glAttachShader(program, shaderf);
 	glLinkProgram(program);
 
@@ -85,9 +85,6 @@ void initialise()
 		delete[] strInfoLog;
 	}
 	glUseProgram(program);
-
-//	glPatchParameteri(GL_QUADS, 4);
-
 
 	proj = glm::perspective(float(20 * 3.1415 / 180), 1.0f, 10.0f, 1000.0f);  //perspective projection matrix
 	view = glm::lookAt(glm::vec3(0.0, 5.0, 12.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)); //view matrix
@@ -120,6 +117,14 @@ void initialise()
 		elems[k * 4 + 2] = 128 + k + 1;
 		elems[k * 4 + 3] = 128 + k;
 	}
+
+//	GLfloat outLevel[4] = { 6, 6, 6, 6 };
+//	GLfloat inLevel[2] = { 6, 6 };
+
+	glPatchParameteri(GL_PATCH_VERTICES, 4);
+//	glPatchParameterfv(GL_PATCH_DEFAULT_OUTER_LEVEL, outLevel);
+//	glPatchParameterfv(GL_PATCH_DEFAULT_INNER_LEVEL, inLevel);
+
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
@@ -154,7 +159,7 @@ void display()
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glBindVertexArray(vaoID);
-	glDrawElements(GL_QUADS, 128 * 128, GL_UNSIGNED_SHORT, NULL);
+	glDrawElements(GL_PATCHES, 128 * 128, GL_UNSIGNED_SHORT, NULL);
 	glFlush();
 }
 
