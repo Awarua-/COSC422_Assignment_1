@@ -1,5 +1,5 @@
 //Vertex data
-float verts[] = 
+float verts[128 * 128 * 3] = 
 {
 	0, 0, 0, 1, 0, 0, 1, 0, -1, 0, 0, -1
 
@@ -16,7 +16,7 @@ float verts[] =
 };
 
 //Polygon definitions of 6 faces using quads
-GLushort elems[] = 
+GLushort elems[128 * 128] = 
 {
 //	0, 1, 2, 3,
 //	4, 5, 6, 7,

@@ -101,11 +101,32 @@ void initialise()
     glGenVertexArrays(2, vboID);
 
     glBindBuffer(GL_ARRAY_BUFFER, vboID[0]);
+
+	for (auto j = 0; j < 128; j++)
+	{	
+		for (auto i = 0; i < 128; i++)
+		{
+			verts[(j * 3 * 128) + i * 3] = i;
+			verts[(j * 3 * 128) + (i * 3 + 1)] = 0;
+			verts[(j * 3 * 128) + (i * 3 + 2)] = -j;
+			elems[(j * 128) + i] = (j * 128) + i;
+		}
+	}
+
+	for (auto k = 0; k < sizeof(elems) / 4; k++)
+	{
+		elems[k * 4] = k;
+		elems[k * 4 + 1] = k + 1;
+		elems[k * 4 + 2] = 128 + k + 1;
+		elems[k * 4 + 3] = 128 + k;
+	}
+
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
     glEnableVertexAttribArray(0);  // Vertex position
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboID[1]);
+
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elems), elems, GL_STATIC_DRAW);
 
     glBindVertexArray(0);
@@ -133,7 +154,7 @@ void display()
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glBindVertexArray(vaoID);
-	glDrawElements(GL_QUADS, 4, GL_UNSIGNED_SHORT, NULL);
+	glDrawElements(GL_QUADS, 128 * 128, GL_UNSIGNED_SHORT, NULL);
 	glFlush();
 }
 
@@ -141,7 +162,7 @@ int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB|GLUT_DEPTH);
-	glutInitWindowSize(500, 500);
+	glutInitWindowSize(1000, 1000);
 	glutCreateWindow("Assignment1 Dion Woolley");
 	glutInitContextVersion (4, 2);
 	glutInitContextProfile ( GLUT_CORE_PROFILE );
