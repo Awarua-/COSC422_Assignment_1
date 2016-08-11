@@ -13,13 +13,16 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Assignment1.h"
+#include "Utilities.h"
+#include "Camera.h"
 using namespace std;
 
 GLuint vaoID;
 GLuint theProgram;
 GLuint matrixLoc;
-float angle = 0.0;
-glm::mat4 projView;
+GLuint tex[1];
+Camera camera;
+
 
 // Force nvidia dedicated graphics
 // comment out if causing problems
@@ -29,42 +32,26 @@ extern "C" {
 }
 #endif
 
-GLuint loadShader(GLenum shaderType, string filename)
+void loadTextures()
 {
-	ifstream shaderFile(filename.c_str());
-	if(!shaderFile.good()) cout << "Error opening shader file." << endl;
-	stringstream shaderData;
-	shaderData << shaderFile.rdbuf();
-	shaderFile.close();
-	string shaderStr = shaderData.str();
-	const char* shaderTxt = shaderStr.c_str();
+	glGenTextures(1, &tex[0]);   //Generate 1 texture ID 
 
-	GLuint shader = glCreateShader(shaderType);
-	glShaderSource(shader, 1, &shaderTxt, NULL);
-	glCompileShader(shader);
-	GLint status;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-	if (status == GL_FALSE)
-	{
-		GLint infoLogLength;
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
-		GLchar *strInfoLog = new GLchar[infoLogLength + 1];
-		glGetShaderInfoLog(shader, infoLogLength, NULL, strInfoLog);
-		const char *strShaderType = NULL;
-		cerr <<  "Compile failure in shader: " << strInfoLog << endl;
-		delete[] strInfoLog;
-	}
-	return shader;
+								 // Load heightMap 
+	glActiveTexture(GL_TEXTURE0);  //Texture unit 0 
+	glBindTexture(GL_TEXTURE_2D, tex[0]);
+	Utilities::loadTGA("HeightMap.tga");
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
-
 
 void initialise()
 {
 	glm::mat4 proj, view;
-	GLuint shaderv = loadShader(GL_VERTEX_SHADER, "Assignment1.vert");
-	GLuint shaderf = loadShader(GL_FRAGMENT_SHADER, "Assignment1.frag");
-	GLuint shadertc = loadShader(GL_TESS_CONTROL_SHADER, "Assignment1.tcs");
-	GLuint shaderte = loadShader(GL_TESS_EVALUATION_SHADER, "Assignment1.tes");
+	GLuint shaderv = Utilities::loadShader(GL_VERTEX_SHADER, "Assignment1.vert");
+	GLuint shaderf = Utilities::loadShader(GL_FRAGMENT_SHADER, "Assignment1.frag");
+	GLuint shadertc = Utilities::loadShader(GL_TESS_CONTROL_SHADER, "Assignment1.tcs");
+	GLuint shaderte = Utilities::loadShader(GL_TESS_EVALUATION_SHADER, "Assignment1.tes");
 
 	GLuint program = glCreateProgram();
 	glAttachShader(program, shaderv);
@@ -86,9 +73,26 @@ void initialise()
 	}
 	glUseProgram(program);
 
-	proj = glm::perspective(float(20 * 3.1415 / 180), 1.0f, 10.0f, 1000.0f);  //perspective projection matrix
-	view = glm::lookAt(glm::vec3(0.0, 5.0, 12.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0)); //view matrix
-	projView = proj*view;  //Product matrix
+	matrixLoc = glGetUniformLocation(program, "mvpMatrix");
+	GLuint gridMax = glGetUniformLocation(program, "gridSizeMax");
+	glUniform1f(gridMax, GRIDSIZE);
+
+	// Load textures 
+	loadTextures();
+	GLuint texLoc = glGetUniformLocation(program, "heightMap");
+	glUniform1i(texLoc, 0);
+
+	// Setup Camera 
+	camera = Camera();
+
+	glutKeyboardFunc(Camera::keyPressed);
+	glutKeyboardUpFunc(Camera::keyUp);
+	glutSpecialFunc(Camera::specialKeyPressed);
+	glutSpecialUpFunc(Camera::specialKeyUp);
+	glutMotionFunc(Camera::mouseDrag);
+	glutPassiveMotionFunc(Camera::mouseMove);
+	glutMouseFunc(Camera::mouseClick);
+	glutMouseWheelFunc(Camera::mouseScroll);
 
 	GLuint vboID[4];
 
@@ -99,31 +103,9 @@ void initialise()
 
     glBindBuffer(GL_ARRAY_BUFFER, vboID[0]);
 
-	for (auto j = 0; j < 128; j++)
-	{	
-		for (auto i = 0; i < 128; i++)
-		{
-			verts[(j * 3 * 128) + i * 3] = i;
-			verts[(j * 3 * 128) + (i * 3 + 1)] = 0;
-			verts[(j * 3 * 128) + (i * 3 + 2)] = -j;
-			elems[(j * 128) + i] = (j * 128) + i;
-		}
-	}
-
-	for (auto k = 0; k < sizeof(elems) / 4; k++)
-	{
-		elems[k * 4] = k;
-		elems[k * 4 + 1] = k + 1;
-		elems[k * 4 + 2] = 128 + k + 1;
-		elems[k * 4 + 3] = 128 + k;
-	}
-
-//	GLfloat outLevel[4] = { 6, 6, 6, 6 };
-//	GLfloat inLevel[2] = { 6, 6 };
+	generateGrid();
 
 	glPatchParameteri(GL_PATCH_VERTICES, 4);
-//	glPatchParameterfv(GL_PATCH_DEFAULT_OUTER_LEVEL, outLevel);
-//	glPatchParameterfv(GL_PATCH_DEFAULT_INNER_LEVEL, inLevel);
 
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
@@ -144,22 +126,17 @@ void initialise()
 
 void update(int value)
 {
-	angle++;
 	glutTimerFunc(50, update, 0);
 	glutPostRedisplay();
 }
 
 void display()
 {
-	glm::mat4 matrix = glm::mat4(1.0);
-	matrix = glm::rotate(matrix, float(angle * 3.15159 / 180), glm::vec3(0.0, 1.0, 0.0));  //rotation matrix
-	glm::mat4 prodMatrix = projView * matrix;        //Model-view-proj matrix
-
-	glUniformMatrix4fv(matrixLoc, 1, GL_FALSE, &prodMatrix[0][0]);
+	glUniformMatrix4fv(matrixLoc, 1, GL_FALSE, &camera.apply()[0][0]);
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glBindVertexArray(vaoID);
-	glDrawElements(GL_PATCHES, 128 * 128, GL_UNSIGNED_SHORT, NULL);
+	glDrawElements(GL_PATCHES, 128 * 128 * 4, GL_UNSIGNED_SHORT, NULL);
 	glFlush();
 }
 
