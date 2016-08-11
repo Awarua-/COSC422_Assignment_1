@@ -53,6 +53,12 @@ void initialise()
 	GLuint shadertc = Utilities::loadShader(GL_TESS_CONTROL_SHADER, "Assignment1.tcs");
 	GLuint shaderte = Utilities::loadShader(GL_TESS_EVALUATION_SHADER, "Assignment1.tes");
 
+	// Load shaders
+	GLuint shaderv = Utilities::loadShader(GL_VERTEX_SHADER, "Assignment1.vert");
+	GLuint shaderf = Utilities::loadShader(GL_FRAGMENT_SHADER, "Assignment1.frag");
+	GLuint shadertc = Utilities::loadShader(GL_TESS_CONTROL_SHADER, "Assignment1.tcs");
+	GLuint shaderte = Utilities::loadShader(GL_TESS_EVALUATION_SHADER, "Assignment1.tes");
+
 	GLuint program = glCreateProgram();
 	glAttachShader(program, shaderv);
 	glAttachShader(program, shadertc);
@@ -106,7 +112,6 @@ void initialise()
 	generateGrid();
 
 	glPatchParameteri(GL_PATCH_VERTICES, 4);
-
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
