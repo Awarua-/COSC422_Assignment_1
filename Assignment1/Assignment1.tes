@@ -1,6 +1,7 @@
 #version 400
 layout(quads, equal_spacing, ccw) in;
 uniform mat4 mvpMatrix;
+uniform sampler2D heightMap;
 vec4 posn;
 
 void main() {
@@ -11,5 +12,12 @@ void main() {
 		 +      u  *      v  * gl_in[2].gl_Position
 		 + (1 - u) *      v  * gl_in[3].gl_Position;
 
+
+	float x = posn.x / 128.0;
+	float z = posn.z / 128.0;
+
+	vec4 height = texture(heightMap, vec2(x, z));
+	posn.y = height.r * 10;
 	gl_Position = mvpMatrix * posn;
+
 }
