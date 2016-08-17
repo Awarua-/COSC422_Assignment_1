@@ -7,6 +7,7 @@ public:
 	static float moveSpeed;
 	static float mouseSensitivity;
 	Camera();
+	glm::mat4 getView();
 	static void toggleMouseLock();
 	void keyOperations();
 	glm::mat4 apply();
@@ -37,14 +38,18 @@ public:
 	void addToX(float x);
 	void addToY(float y);
 	void addToZ(float z);
-	float getRy() const;
+	static float getRy();
+	glm::vec3 getPosition() const;
+	bool getWireFrameMode();
 private:
 	glm::vec3 pos;
 	glm::mat4 projView;
 	glm::mat4 prodMatrix;
 	glm::mat4 proj;
+	glm::mat4 view;
 	glm::vec3 upVec = { 0, 1, 0 };
 	glm::vec3 zeroVec = { 0, 0,0 };
+	bool wireframe = true;
 	static float fov;
 	static int windowWidth;
 	static int windowHeight;

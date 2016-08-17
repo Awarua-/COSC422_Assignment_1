@@ -3,7 +3,7 @@
 #include <GL/freeglut_std.h> 
 
 float Camera::moveSpeed = 3;
-float Camera::mouseSensitivity = 0.005;
+float Camera::mouseSensitivity = 0.0005;
 
 static bool* keyStates = new bool[256];
 static bool* keySpecialStates = new bool[246];
@@ -18,7 +18,8 @@ float Camera::initialFoV = 45.0f;
 float Camera::fov = initialFoV;
 int Camera::windowWidth = 500;
 int Camera::windowHeight = 500;
-bool Camera::mouseLock = false;
+bool Camera::mouseLock = true;
+//bool Camera::wireframe = false;
 
 Camera::Camera()
 {
@@ -28,7 +29,8 @@ Camera::Camera()
 	windowWidth = 1000;
 	windowHeight = 1000;
 	pos = { 64, 20, -64 };
-	mouseLock = false;
+	mouseLock = true;
+	wireframe = true;
 
 	proj = glm::perspective(float(glm::radians(20.0)), 1.0f, 10.0f, 1000.0f);
 }
@@ -75,8 +77,8 @@ glm::mat4 Camera::apply()
 	glm::mat4 rotationy = rotate(rotationx, glm::radians(float(ry)), glm::vec3(0, 1, 0));
 	glm::mat4 rotationz = rotate(rotationy, glm::radians(float(rz)), glm::vec3(0, 0, 1));
 
-	proj = glm::perspective(fov, 4.0f / 3.0f, 0.1f, 100.0f);
-	glm::mat4 view = lookAt(pos, pos + direction(), upVec);
+	proj = glm::perspective(float(glm::radians(fov)), 4.0f / 3.0f, 0.1f, 1000.0f);
+	view = lookAt(pos, pos + direction(), upVec);
 
 	//reset mouse position 
 	if (mouseLock) {
@@ -84,6 +86,11 @@ glm::mat4 Camera::apply()
 	}
 
 	return proj * view * rotationz;
+}
+
+glm::mat4 Camera::getView()
+{
+	return view;
 }
 
 glm::vec3 Camera::direction() const
@@ -183,6 +190,14 @@ void Camera::keyOperations(void)
 	{
 		mouseLock = false;
 	}
+	if (keyStates['w'])
+	{
+		wireframe = true;
+	}
+	else
+	{
+		wireframe = false;
+	}
 }
 
 void Camera::setX(float x)
@@ -278,7 +293,17 @@ void Camera::addToZ(float z)
 }
 
 
-float Camera::getRy() const
+float Camera::getRy()
 {
 	return ry;
+}
+
+glm::vec3 Camera::getPosition() const
+{
+	return pos;
+}
+
+bool Camera::getWireFrameMode()
+{
+	return wireframe;
 }

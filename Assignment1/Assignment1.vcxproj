@@ -148,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assignment1.frag" />
+    <None Include="Assignment1.geom" />
     <None Include="Assignment1.tcs" />
     <None Include="Assignment1.tes" />
     <None Include="Assignment1.vert" />
@@ -160,8 +161,12 @@
     <ClInclude Include="Utilities.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="grass.tga" />
     <Image Include="HeightMap.jpg" />
     <Image Include="HeightMap.tga" />
+    <Image Include="rock.tga" />
+    <Image Include="snow.tga" />
+    <Image Include="water.tga" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,5 +1,6 @@
 #pragma once
 #define GRIDSIZE 128
+#define HEIGHTSCALE 10
 #define VERTEX_COMPONENTS 3
 #define QUAD_COMPONENTS 4
 
