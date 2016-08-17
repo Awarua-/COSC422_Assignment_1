@@ -24,14 +24,30 @@ void main()
 		diffuse = max(dot(normal, normalize(lightVec)), 0);
 		texCoord = posn.xz;
 		
-		if (posn.y < heightScale / 4) {
+		if (posn.y < (2 * heightScale / 12)) {
 			texWeight = vec4(1, 0, 0, 0);
 		}
 		else if (posn.y < heightScale / 2) {
 			texWeight = vec4(0, 1, 0, 0);
 		}
-		else if (posn.y < 3 * heightScale / 4) {
+		else if (posn.y < (5 * heightScale / 8))
+		{
+			float period = (5 * heightScale / 8) - (heightScale / 2);
+			float point = posn.y - (heightScale / 2);
+			float percentageRock = point / period;
+			float percentageGrass = 1 - percentageRock;
+			texWeight = vec4(0, percentageGrass, percentageRock, 0);
+		}
+		else if (posn.y < (3 * heightScale / 4)) {
 			texWeight = vec4(0, 0, 1, 0);
+		}
+		else if (posn.y < (7 * heightScale / 8))
+		{
+			float period = (7 * heightScale / 8) - (3 * heightScale / 4);
+			float point = posn.y - (3 * heightScale / 4);
+			float percentageSnow = point / period;
+			float percentageRock = 1 - percentageSnow;
+			texWeight = vec4(0, 0, percentageRock, percentageSnow);
 		}
 		else {
 			texWeight = vec4(0, 0, 0, 1);

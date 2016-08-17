@@ -31,6 +31,7 @@ GLuint texSnow;
 Camera camera;
 int defaultTessLevel;
 int maxTessLevel;
+int slopePointLookAhead;
 
 glm::vec3 light;
 
@@ -139,12 +140,16 @@ void initialise()
 	// Tessilation levels
 	defaultTessLevel = 1;
 	maxTessLevel = 10;
+	slopePointLookAhead = 4;
 
 	GLuint dtl = glGetUniformLocation(program, "defaultTessLevel");
 	glUniform1i(dtl, defaultTessLevel);
 
 	GLuint mtl = glGetUniformLocation(program, "maxTessLevel");
 	glUniform1i(mtl, maxTessLevel);
+
+	GLuint slopePointLoc = glGetUniformLocation(program, "slopeDistance");
+	glUniform1i(slopePointLoc, slopePointLookAhead);
 
 	// Load textures 
 	loadTextures();
@@ -159,8 +164,6 @@ void initialise()
 	glUniform1i(texLoc, 3);
 	texLoc = glGetUniformLocation(program, "snow");
 	glUniform1i(texLoc, 4);
-
-
 
 	// Setup Camera 
 	camera = Camera();

@@ -14,7 +14,7 @@ float Camera::rz = 0;
 
 float Camera::verticalAngle = 0.0f;
 float Camera::horizontalAngle = 3.14f;
-float Camera::initialFoV = 45.0f;
+float Camera::initialFoV = 70.0f;
 float Camera::fov = initialFoV;
 int Camera::windowWidth = 500;
 int Camera::windowHeight = 500;
